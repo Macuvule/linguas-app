@@ -1,0 +1,1 @@
+export { Splash_Screen as default } from '@/features/splash/splashScreen';
