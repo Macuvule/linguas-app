@@ -4,7 +4,7 @@ export type DialogueLine = {
   id: number;
   dialogue_id: number;
   speaker: string;
-  english: string;
+  text: string;
   translation: string | null;
   audio_key: number | null;
 };
@@ -14,34 +14,36 @@ export type Dialogue = {
   lesson_id: number;
   title: string;
   audio_group: string | null;
+  language_code: string,
   lines: DialogueLine[];
 };
 
-export function getDialogueByLesson(
-  lessonId: number
-): Dialogue | null {
+export function getDialogueByLesson(lessonId: number): Dialogue | null {
   const dialogue = db.getFirstSync<{
     id: number;
     lesson_id: number;
     title: string;
     audio_group: string | null;
+    language_code: string;
   }>(
     `
       SELECT
-        id,
-        lesson_id,
-        title,
-        audio_group
-      FROM dialogues
-      WHERE lesson_id = ?
+        d.id,
+        d.lesson_id,
+        d.title,
+        d.audio_group,
+        lang.code AS language_code
+      FROM dialogues d
+      JOIN lessons l ON l.id = d.lesson_id
+      JOIN categories c ON c.id = l.category_id
+      JOIN languages lang ON lang.id = c.language_id
+      WHERE d.lesson_id = ?
       LIMIT 1;
     `,
     lessonId
   );
 
-  if (!dialogue) {
-    return null;
-  }
+  if (!dialogue) return null;
 
   const lines = db.getAllSync<DialogueLine>(
     `
@@ -49,7 +51,7 @@ export function getDialogueByLesson(
         id,
         dialogue_id,
         speaker,
-        english,
+        text,
         translation,
         audio_key
       FROM dialogue_lines

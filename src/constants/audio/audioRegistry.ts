@@ -1,31 +1,33 @@
-import { greetingsAudio } from "./greetingsAudio";
+import { greetingsAudioCh } from "./ch/greetingsAudio";
+import { greetingsAudioEn } from "./en/greetingsAudio";
 
-export const audioRegistry = {
-  greetings: greetingsAudio,
+type AudioSource = number; // o que o require devolve no React Native
+type AudioGroup = Record<number, AudioSource>;
+
+export const audioRegistry: Record<string, Record<string, AudioGroup>> = {
+  en: {
+    greetings: greetingsAudioEn,
+  },
+  Ch: {
+    greetings: greetingsAudioCh,
+  },
 };
 
 export function getOriginalAudio(
+  languageCode: string,
   audioGroup: string,
   audioKey: number | null
-) {
-  if (!audioKey) {
-    return null;
-  }
+): AudioSource | null {
+  if (audioKey == null) return null;
 
-  const group =
-    audioRegistry[
-      audioGroup as keyof typeof audioRegistry
-    ];
+  const group = audioRegistry[languageCode]?.[audioGroup];
 
   if (!group) {
     console.warn(
-      `Grupo de áudio não encontrado: ${audioGroup}`
+      `Áudio não encontrado: idioma="${languageCode}", grupo="${audioGroup}"`
     );
-
     return null;
   }
 
-  return group[
-    audioKey as keyof typeof group
-  ] ?? null;
+  return group[audioKey] ?? null;
 }

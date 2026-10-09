@@ -1,103 +1,156 @@
-import React, { useEffect, useState } from "react";
-import { ScrollView, View, StyleSheet } from "react-native";
-import HomeHeader from "./components/home-header";
-import SearchBar from "./components/search-bar";
-import LevelFilter from "./components/level-filter";
-import DialogueCard from "./components/dialogue-card";
-import { getCategories, Category } from "@/database/repositories/categoryRepository";
-import { number } from "zod";
-import { Text } from '@/components/ui';
+import { useEffect, useState } from "react";
+import { ScrollView, StyleSheet, View } from "react-native";
 
+import DialogueCard from "./components/dialogue-card";
+import HomeHeader from "./components/home-header";
+import LevelFilter from "./components/level-filter";
+import SearchBar from "./components/search-bar";
+import SlideButton from "./components/slide-button";
+import { useLanguages } from "./useLanguages";
+
+import {
+  Category,
+  getCategoriesByLanguage,
+} from "@/database/repositories/categoryRepository";
+
+import { Text } from "@/components/ui";
 
 type Props = {
+  languageId: number;
   onCategoryPress?: (categoryId: number) => void;
+  onLanguageChange: (languageId: number) => void;
 };
 
-export default function HomeScreen({ onCategoryPress }: Props) {
-
+export default function HomeScreen({
+  languageId,
+  onLanguageChange,
+  onCategoryPress,
+}: Props) {
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedLevel, setSelectedLevel] = useState("Todos");
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null);
+  const { languages, loading: loadingLanguages } = useLanguages();
 
-
-  useEffect(()=>{
+  useEffect(() => {
     let isMounted = true;
 
-    async function loadCategories() {
-      try{
+    if (
+      languages.length > 0 &&
+      !languages.some((language) => language.id === languageId)
+    ) {
+      onLanguageChange(languages[0].id);
+    }
+
+    function loadCategories() {
+      try {
         setLoading(true);
-        const data = await getCategories();
-        if (isMounted) { setCategories(data); }
+        setError(null);
+
+        const data = getCategoriesByLanguage(languageId);
+
+        if (isMounted) {
+          setCategories(data);
+        }
       } catch (err) {
-        if (isMounted) setError("Não foi possível carregar as categorias.")
+        if (isMounted) {
+          setCategories([]);
+          setError("Não foi possível carregar as categorias.");
+        }
       } finally {
-        if (isMounted) setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     }
 
     loadCategories();
+
     return () => {
       isMounted = false;
     };
-  }, []);
+  },[languages, languageId, onLanguageChange]);
 
-  const filteredCategories = categories.filter((category)=>{
-    const matchesLevel = 
+  const filteredCategories = categories.filter((category) => {
+    const matchesLevel =
       selectedLevel === "Todos" ||
       category.level === selectedLevel;
-    
+
     const matchesSearch = category.title
       .toLowerCase()
-      .includes(search.toLowerCase())
+      .includes(search.toLowerCase());
 
     return matchesLevel && matchesSearch;
-  })
+  });
 
   return (
     <View style={styles.container}>
       <HomeHeader />
+
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
+
+        <View style={styles.languageSection}>
+          <Text style={styles.languageTitle}>
+            Aprender
+          </Text>
+
+          <SlideButton
+            options={languages}
+            selectedId={languageId}
+            onChange={onLanguageChange}
+          />
+        </View>
+
         <View style={styles.searchSection}>
-          <View>
-            <View>
-              <SearchBar value={search} onChangeText={setSearch} />
-            </View>
-          </View>
+          <SearchBar
+            value={search}
+            onChangeText={setSearch}
+          />
         </View>
 
         <LevelFilter
           selectedLevel={selectedLevel}
           onChange={setSelectedLevel}
         />
+
         {!loading && error && (
           <View style={styles.emptyState}>
             <Text>{error}</Text>
           </View>
         )}
 
-        {!loading && !error &&(
+        {!loading && !error && (
           <View style={styles.dialogueList}>
             {filteredCategories.map((category) => (
-              <DialogueCard key={category.id} {...category} 
-              handlePress={() => onCategoryPress?.(category.id)} 
-              image={category.image} level={category.level} description={category.description ?? "sem descricao disponivel" } />
+              <DialogueCard
+                key={category.id}
+                {...category}
+                handlePress={() =>
+                  onCategoryPress?.(category.id)
+                }
+                image={category.image}
+                level={category.level}
+                description={
+                  category.description ??
+                  "Sem descrição disponível"
+                }
+              />
             ))}
           </View>
         )}
 
-        {!loading && !error && filteredCategories.length === 0 && (
+        {!loading &&
+          !error &&
+          filteredCategories.length === 0 && (
             <View style={styles.emptyState}>
               <View style={styles.emptyCircle} />
-              <View style={styles.emptyInfo}>
-                {/* Empty state / informação */}
-              </View>
+              <View style={styles.emptyInfo} />
             </View>
-        )}
+          )}
       </ScrollView>
     </View>
   );
@@ -141,5 +194,15 @@ const styles = StyleSheet.create({
 
   emptyInfo: {
     marginTop: 16,
+  },
+
+  languageSection: {
+  gap: 10,
+  },
+
+  languageTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#456800",
   },
 });

@@ -1,16 +1,16 @@
-import React, { useEffect, useState } from "react";
-import { ScrollView, View, StyleSheet, Text, Pressable } from "react-native";
+import { useEffect, useState } from "react";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import DialogueHeader from "./components/dialogue-header";
 import DialogueProgress from "./components/dialogue-progress";
-import SpeakerSelector from "./components/speaker-selector";
 import PartnerMessage from "./components/partner-message";
-import UserMessage from "./components/user-message";
 import RecordingButton from "./components/recording-button";
+import SpeakerSelector from "./components/speaker-selector";
+import UserMessage from "./components/user-message";
 
-import { getDialogueByLesson, Dialogue } from "@/database/repositories/dialogueRepository";
-import { getRecordingByDialogueLine } from "@/database/repositories/userRecordingRepository";
 import { getOriginalAudio } from "@/constants/audio/audioRegistry";
+import { Dialogue, getDialogueByLesson } from "@/database/repositories/dialogueRepository";
+import { getRecordingByDialogueLine } from "@/database/repositories/userRecordingRepository";
 
 type Props = {
   lessonId: number;
@@ -84,7 +84,7 @@ export default function DialogueScreen({ lessonId }: Props) {
    */
   const originalAudio =
     currentLine && dialogue.audio_group
-      ? getOriginalAudio(dialogue.audio_group, currentLine.audio_key)
+      ? getOriginalAudio(dialogue.language_code, dialogue.audio_group, currentLine.audio_key)
       : null;
 
   function goToNextLine() {
@@ -119,7 +119,7 @@ export default function DialogueScreen({ lessonId }: Props) {
             <>
               {selectedSpeaker && currentLine.speaker === selectedSpeaker ? (
                 <>
-                  <UserMessage text={currentLine.english} />
+                  <UserMessage text={currentLine.text} />
 
                   <RecordingButton
                     key={`${selectedSpeaker}-${currentLine.id}`}
@@ -144,7 +144,7 @@ export default function DialogueScreen({ lessonId }: Props) {
                 <>
                   <PartnerMessage
                     name={currentLine.speaker}
-                    message={currentLine.english}
+                    message={currentLine.text}
                     translation={currentLine.translation ?? ""}
                     originalAudio={originalAudio}
                     userRecording={userRecording}

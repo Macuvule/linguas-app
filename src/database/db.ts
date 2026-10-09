@@ -6,12 +6,25 @@ export function initializeDatabase() {
     db.execSync(`
         PRAGMA foreign_keys = ON;
 
+        CREATE TABLE IF NOT EXISTS languages (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          name TEXT NOT NULL UNIQUE,
+          code TEXT NOT NULL UNIQUE
+        );
+
         CREATE TABLE IF NOT EXISTS categories (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            title TEXT NOT NULL UNIQUE,
-            description TEXT,
-            level TEXT,
-            image TEXT
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          language_id INTEGER NOT NULL,
+          title TEXT NOT NULL,
+          description TEXT,
+          level TEXT,
+          image TEXT,
+
+          UNIQUE (language_id, title),
+
+          FOREIGN KEY (language_id)
+            REFERENCES languages(id)
+            ON DELETE CASCADE
         );
 
         CREATE TABLE IF NOT EXISTS lessons (
@@ -43,18 +56,19 @@ export function initializeDatabase() {
         );
 
         CREATE TABLE IF NOT EXISTS dialogue_lines (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            dialogue_id INTEGER NOT NULL,
-            speaker TEXT NOT NULL,
-            english TEXT NOT NULL,
-            translation TEXT,
-            audio_key INTEGER,
-            order_index INTEGER NOT NULL DEFAULT 0,
-            UNIQUE(dialogue_id, order_index),
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          dialogue_id INTEGER NOT NULL,
+          speaker TEXT NOT NULL,
+          text TEXT NOT NULL,
+          translation TEXT,
+          audio_key INTEGER,
+          order_index INTEGER NOT NULL DEFAULT 0,
 
-            FOREIGN KEY (dialogue_id)
-                REFERENCES dialogues(id)
-                ON DELETE CASCADE
+          UNIQUE(dialogue_id, order_index),
+
+          FOREIGN KEY (dialogue_id)
+            REFERENCES dialogues(id)
+            ON DELETE CASCADE
         );
 
         CREATE TABLE IF NOT EXISTS user_recordings (
@@ -81,6 +95,7 @@ export function resetDatabase() {
     DROP TABLE IF EXISTS dialogues;
     DROP TABLE IF EXISTS lessons;
     DROP TABLE IF EXISTS categories;
+    DROP TABLE IF EXISTS languages;
 
     PRAGMA foreign_keys = ON;
   `);
@@ -88,37 +103,71 @@ export function resetDatabase() {
   console.log("Banco de dados apagado.");
 }
 
-export function insertCategory(
-  title: string,
-  description: string,
-  level: string,
-  image: string
-) {
+export function insertLanguage(
+  name: string,
+  code: string
+): number | undefined {
   const result = db.runSync(
     `
-      INSERT OR IGNORE INTO categories (title, description, level, image)
-      VALUES (?, ?, ?, ?);
+      INSERT OR IGNORE INTO languages (name, code)
+      VALUES (?, ?);
     `,
+    name,
+    code
+  );
+
+  if (result.changes > 0) {
+    return result.lastInsertRowId;
+  }
+
+  const existing = db.getFirstSync<{ id: number }>(
+    `
+      SELECT id
+      FROM languages
+      WHERE code = ?;
+    `,
+    code
+  );
+
+  return existing?.id;
+}
+
+export function insertCategory(
+  languageId: number,
+  title: string,
+  description: string | null,
+  level: string,
+  image: string
+): number | undefined {
+  const result = db.runSync(
+    `
+      INSERT OR IGNORE INTO categories
+        (language_id, title, description, level, image)
+      VALUES (?, ?, ?, ?, ?);
+    `,
+    languageId,
     title,
     description,
     level,
     image
   );
 
-  if (result.changes === 0) {
-    const existing = db.getFirstSync<{ id: number }>(
-      `
-        SELECT id
-        FROM categories
-        WHERE title = ?;
-      `,
-      title
-    );
-
-    return existing?.id;
+  if (result.changes > 0) {
+    return result.lastInsertRowId;
   }
 
-  return result.lastInsertRowId;
+  const existing = db.getFirstSync<{ id: number }>(
+    `
+      SELECT id
+      FROM categories
+      WHERE language_id = ?
+        AND title = ?;
+    `,
+    languageId,
+    title
+  );
+
+  return existing?.id;
 }
 
 export function insertLesson(
@@ -201,27 +250,20 @@ export function insertDialogue(
 export function insertDialogueLine(
   dialogueId: number,
   speaker: string,
-  english: string,
-  translation: string,
+  text: string,
+  translation: string | null,
   audioKey: number | null,
   orderIndex: number
-) {
+): number | undefined {
   const result = db.runSync(
     `
       INSERT OR IGNORE INTO dialogue_lines
-        (
-          dialogue_id,
-          speaker,
-          english,
-          translation,
-          audio_key,
-          order_index
-        )
+        (dialogue_id, speaker, text, translation, audio_key, order_index)
       VALUES (?, ?, ?, ?, ?, ?);
     `,
     dialogueId,
     speaker,
-    english,
+    text,
     translation,
     audioKey,
     orderIndex
@@ -244,5 +286,6 @@ export function insertDialogueLine(
 
   return existing?.id;
 }
+
 
 export default db;

@@ -1,6 +1,8 @@
-import React from "react";
-import { Image, Text, View, StyleSheet, Pressable } from "react-native";
+import Avatar from "@/components/ui/avatar";
+import SpeakerIcon from "@/components/ui/icons/speakerIcon";
 import { useAudioPlayer } from "expo-audio";
+import { Pressable, StyleSheet, Text, View } from "react-native";
+import SvgAvatarHero from '@/components/ui/illustrations/avatarHero';
 
 type Props = {
   name: string;
@@ -26,15 +28,13 @@ export default function PartnerMessage({ name, message, translation, originalAud
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Image
-          source={{ uri: "https://images.unsplash.com/photo-1494790108377-be9c29b29330" }}
-          style={styles.avatar}
-        />
+        <Avatar name={name} size={32} Illustration={SvgAvatarHero} />
         <Text style={styles.name}>{name}</Text>
       </View>
 
       <Pressable style={styles.bubble} onPress={playOriginalAudio}>
-        <Text style={styles.message}>🔊 {message}</Text>
+        <Text style={styles.message}>{message}</Text>
+        <SpeakerIcon size={20} color="#456800" active={!!originalAudio} />
 
         {translation && <Text style={styles.translation}>{translation}</Text>}
       </Pressable>
