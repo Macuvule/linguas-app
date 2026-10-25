@@ -1,10 +1,11 @@
 import React from "react";
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { Screen } from "@/components/safeArea/screen";
 
 import DialogueScreen from "@/features/dialogues/dialogue-screen";
 
 export default function DialogueRoute() {
+  const router = useRouter();
   const { lessonId } = useLocalSearchParams<{
     lessonId: string;
   }>();
@@ -17,7 +18,11 @@ export default function DialogueRoute() {
 
   return (
     <Screen edges={["top"]}>
-      <DialogueScreen lessonId={id} />
+      <DialogueScreen lessonId={id}
+        onExercisePress = {()=>{
+          router.push (`/lesson/exercises/${id}`)
+        }}
+      />
     </Screen>
   );
 }

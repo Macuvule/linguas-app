@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Pressable, Text, View, StyleSheet } from "react-native";
+import { Ionicons} from "@expo/vector-icons";
+import { useToggleAudio } from "@/lib/hooks/use-toggle-audio";
 
 import {
   useAudioRecorder,
@@ -22,6 +24,7 @@ export default function RecordingButton({ dialogueLineId, initialAudioUri, onRec
   const recorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
   const recorderState = useAudioRecorderState(recorder);
 
+
   const [audioUri, setAudioUri] = useState<string | null>(initialAudioUri ?? null);
 
   /*
@@ -32,7 +35,7 @@ export default function RecordingButton({ dialogueLineId, initialAudioUri, onRec
     setAudioUri(initialAudioUri ?? null);
   }, [initialAudioUri]);
 
-  const player = useAudioPlayer(audioUri);
+  const { toggle: togglePlayback, stop: stopPlayback, isPlaying } = useToggleAudio(audioUri);
 
   async function startRecording() {
     const permission =
@@ -112,39 +115,29 @@ async function stopRecording() {
   console.log("=================================");
 }
 
-  function playRecording() {
-    if (!audioUri) {
-      console.log("Nenhuma gravação disponível.");
-      return;
-    }
-
-    player.seekTo(0);
-    player.play();
-  }
-
   const isRecording = recorderState.isRecording;
 
   return (
     <View style={styles.container}>
       {!audioUri && !isRecording && (
         <Pressable style={styles.recordButton} onPress={startRecording}>
-          <Text style={styles.icon}>🎙️</Text>
+          <Ionicons name="mic-circle" size={24} color="#FFFFFF" />
           <Text style={styles.text}>Gravar resposta</Text>
         </Pressable>
       )}
 
       {isRecording && (
         <Pressable style={styles.stopButton} onPress={stopRecording}>
-          <Text style={styles.icon}>⏹️</Text>
+          <Ionicons name="stop-circle" size={24} color="#FFFFFF" />
           <Text style={styles.text}>Parar gravação</Text>
         </Pressable>
       )}
 
       {audioUri && !isRecording && (
         <View style={styles.recordedContainer}>
-          <Pressable style={styles.playButton} onPress={playRecording}>
-            <Text style={styles.icon}>▶️</Text>
-            <Text style={styles.text}>Ouvir gravação</Text>
+          <Pressable style={styles.playButton} onPress={togglePlayback}>
+            <Ionicons name={isPlaying ? "pause-circle" : "play-circle"} size={24} color="#FFFFFF" />
+            <Text style={styles.text}> {isPlaying ? "Pausar" : "Reproduzir"}</Text>
           </Pressable>
 
           <Pressable style={styles.recordAgainButton} onPress={() => setAudioUri(null)}>
@@ -198,11 +191,6 @@ const styles = StyleSheet.create({
     color: "#456800",
     fontSize: 14,
     fontWeight: "600",
-  },
-
-  icon: {
-    fontSize: 20,
-    marginBottom: 4,
   },
 
   text: {

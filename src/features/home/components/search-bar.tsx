@@ -13,12 +13,14 @@ export default function SearchBar({
 }: SearchBarProps) {
   return (
     <View style={styles.container}>
-      <Search size={20} color="#737a65" />
+      <Search size={20} color="#456800" />
       <TextInput
         value={value}
         onChangeText={onChangeText}
-        placeholder="Procurar diálogos..."
-        placeholderTextColor="#737a65"
+        placeholder="Procurar ..."
+        placeholderTextColor="#7f9a4f"
+        selectionColor="#456800"
+        cursorColor="#456800"
         style={styles.input}
       />
     </View>
@@ -30,7 +32,8 @@ const styles = StyleSheet.create({
     height: 56,
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#f2f5e4",
+    gap: 10,
+    backgroundColor: "#FFFFFF",
     borderRadius: 20,
     paddingHorizontal: 16,
   },
@@ -38,6 +41,7 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     fontSize: 16,
-    color: "#191d13",
+    color: "#456800",
+    fontWeight: "600",
   },
 });

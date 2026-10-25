@@ -16,5 +16,5 @@
     "**/*.tsx",
     ".expo/types/**/*.ts",
     "expo-env.d.ts"
-, "src/components/ui/icons/Discussion.js", "src/components/ui/icons/OnlineWorldCuate.js"  ]
+, "src/components/ui/icons/Discussion.js", "src/components/ui/icons/OnlineWorldCuate.js", "src/components/ui/icons/Animals.js", "src/components/ui/icons/Colors.js", "src/components/ui/icons/Family.js", "src/components/ui/icons/Numbers.js"  ]
 }

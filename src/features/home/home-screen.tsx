@@ -6,6 +6,7 @@ import HomeHeader from "./components/home-header";
 import LevelFilter from "./components/level-filter";
 import SearchBar from "./components/search-bar";
 import SlideButton from "./components/slide-button";
+import LoadingSpinner from "@/components/ui/loading-spinner";
 import { useLanguages } from "./useLanguages";
 
 import {
@@ -26,51 +27,49 @@ export default function HomeScreen({
   onLanguageChange,
   onCategoryPress,
 }: Props) {
-  const [categories, setCategories] = useState<Category[]>([]);
   const [selectedLevel, setSelectedLevel] = useState("Todos");
   const [search, setSearch] = useState("");
-  const [loading, setLoading] = useState(true);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loadedLanguageId, setLoadedLanguageId] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const { languages, loading: loadingLanguages } = useLanguages();
 
-  useEffect(() => {
-    let isMounted = true;
+  // loading derivado: os dados em ecrã não são do idioma selecionado
+  const loading = loadingLanguages || loadedLanguageId !== languageId;
 
+  useEffect(() => {
     if (
       languages.length > 0 &&
       !languages.some((language) => language.id === languageId)
     ) {
       onLanguageChange(languages[0].id);
     }
+  }, [languages, languageId, onLanguageChange]);
 
-    function loadCategories() {
+  useEffect(() => {
+    let isMounted = true;
+    setError(null);
+
+    // dá tempo ao React Native de desenhar o spinner antes da query síncrona
+    const timer = setTimeout(() => {
       try {
-        setLoading(true);
-        setError(null);
-
         const data = getCategoriesByLanguage(languageId);
-
-        if (isMounted) {
-          setCategories(data);
-        }
+        if (isMounted) setCategories(data);
       } catch (err) {
         if (isMounted) {
           setCategories([]);
           setError("Não foi possível carregar as categorias.");
         }
       } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
+        if (isMounted) setLoadedLanguageId(languageId);
       }
-    }
-
-    loadCategories();
+    }, 50);
 
     return () => {
       isMounted = false;
+      clearTimeout(timer);
     };
-  },[languages, languageId, onLanguageChange]);
+  }, [languageId]);
 
   const filteredCategories = categories.filter((category) => {
     const matchesLevel =
@@ -94,10 +93,6 @@ export default function HomeScreen({
       >
 
         <View style={styles.languageSection}>
-          <Text style={styles.languageTitle}>
-            Aprender
-          </Text>
-
           <SlideButton
             options={languages}
             selectedId={languageId}
@@ -116,6 +111,10 @@ export default function HomeScreen({
           selectedLevel={selectedLevel}
           onChange={setSelectedLevel}
         />
+
+        {(loading || loadingLanguages) && (
+          <LoadingSpinner message="A carregar..." />
+        )}
 
         {!loading && error && (
           <View style={styles.emptyState}>

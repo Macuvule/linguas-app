@@ -1,6 +1,7 @@
 import React from "react";
 import { Pressable, Text, View, StyleSheet } from "react-native";
 import { router } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 
 import { ICONS } from "@/components/ui/icons";
 
@@ -36,7 +37,7 @@ export default function DialogueCard({
           <Text numberOfLines={1} style={styles.title}>
             {title}
           </Text>
-          <Text style={styles.playIcon}>▶</Text>
+          <Ionicons name="play-circle" size={20} color="#456800" />
         </View>
 
         <Text numberOfLines={2} style={styles.description}>

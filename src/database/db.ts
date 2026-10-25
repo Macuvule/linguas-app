@@ -71,6 +71,70 @@ export function initializeDatabase() {
             ON DELETE CASCADE
         );
 
+        CREATE TABLE IF NOT EXISTS lesson_questions (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          lesson_id INTEGER NOT NULL,
+          question_text TEXT NOT NULL,
+          explanation TEXT,
+          order_index INTEGER NOT NULL DEFAULT 0,
+
+          UNIQUE (lesson_id, order_index),
+
+          FOREIGN KEY (lesson_id)
+            REFERENCES lessons(id)
+            ON DELETE CASCADE
+        );
+
+        CREATE TABLE IF NOT EXISTS question_options (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          question_id INTEGER NOT NULL,
+          option_text TEXT NOT NULL,
+          is_correct INTEGER NOT NULL DEFAULT 0
+            CHECK (is_correct IN (0, 1)),
+          order_index INTEGER NOT NULL DEFAULT 0,
+
+          UNIQUE (question_id, order_index),
+
+          FOREIGN KEY (question_id)
+            REFERENCES lesson_questions(id)
+            ON DELETE CASCADE
+        );
+
+        CREATE TABLE IF NOT EXISTS quiz_attempts (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          lesson_id INTEGER NOT NULL,
+          started_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+          completed_at TEXT,
+          score INTEGER,
+          total_questions INTEGER NOT NULL DEFAULT 0,
+
+          FOREIGN KEY (lesson_id)
+            REFERENCES lessons(id)
+            ON DELETE CASCADE
+        );
+
+        CREATE TABLE IF NOT EXISTS user_question_answers (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          attempt_id INTEGER NOT NULL,
+          question_id INTEGER NOT NULL,
+          selected_option_id INTEGER NOT NULL,
+          is_correct INTEGER NOT NULL
+            CHECK (is_correct IN (0, 1)),
+
+          UNIQUE (attempt_id, question_id),
+
+          FOREIGN KEY (attempt_id)
+            REFERENCES quiz_attempts(id)
+            ON DELETE CASCADE,
+
+          FOREIGN KEY (question_id)
+            REFERENCES lesson_questions(id)
+            ON DELETE CASCADE,
+
+          FOREIGN KEY (selected_option_id)
+            REFERENCES question_options(id)
+        );
+
         CREATE TABLE IF NOT EXISTS user_recordings (
               id INTEGER PRIMARY KEY AUTOINCREMENT,
               dialogue_line_id INTEGER NOT NULL UNIQUE,
@@ -93,6 +157,10 @@ export function resetDatabase() {
 
     DROP TABLE IF EXISTS dialogue_lines;
     DROP TABLE IF EXISTS dialogues;
+    DROP TABLE IF EXISTS user_question_answers;
+    DROP TABLE IF EXISTS quiz_attempts;
+    DROP TABLE IF EXISTS question_options;
+    DROP TABLE IF EXISTS lesson_questions;
     DROP TABLE IF EXISTS lessons;
     DROP TABLE IF EXISTS categories;
     DROP TABLE IF EXISTS languages;
@@ -285,6 +353,56 @@ export function insertDialogueLine(
   );
 
   return existing?.id;
+}
+
+export function insertLessonQuestion(
+  lessonId: number,
+  questionText: string,
+  explanation: string | null,
+  orderIndex: number
+): number | undefined {
+  db.runSync(
+    `
+      INSERT OR IGNORE INTO lesson_questions
+        (lesson_id, question_text, explanation, order_index)
+      VALUES (?, ?, ?, ?);
+    `,
+    lessonId,
+    questionText,
+    explanation,
+    orderIndex
+  );
+
+  const existing = db.getFirstSync<{ id: number }>(
+    `
+      SELECT id
+      FROM lesson_questions
+      WHERE lesson_id = ? AND order_index = ?;
+    `,
+    lessonId,
+    orderIndex
+  );
+
+  return existing?.id;
+}
+
+export function insertQuestionOption(
+  questionId: number,
+  optionText: string,
+  isCorrect: boolean,
+  orderIndex: number
+): void {
+  db.runSync(
+    `
+      INSERT OR IGNORE INTO question_options
+        (question_id, option_text, is_correct, order_index)
+      VALUES (?, ?, ?, ?);
+    `,
+    questionId,
+    optionText,
+    isCorrect ? 1 : 0,
+    orderIndex
+  );
 }
 
 

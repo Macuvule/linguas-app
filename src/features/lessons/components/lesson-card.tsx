@@ -1,6 +1,7 @@
 import React from "react";
 import { Image, Pressable, Text, View, StyleSheet } from "react-native";
 import { router } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 
 import { ICONS } from "@/components/ui/icons";
 
@@ -31,10 +32,10 @@ export default function LessonCard({
 
       <View style={styles.content}>
         <View style={styles.header}>
-          <Text numberOfLines={1} style={styles.title}>
+          <Text style={styles.title}>
             {title}
           </Text>
-          <Text style={styles.playIcon}>▶</Text>
+          <Ionicons name="play-circle" size={20} color="#456800" />
         </View>
 
         <Text numberOfLines={2} style={styles.description}>
@@ -52,12 +53,14 @@ const styles = StyleSheet.create({
     padding: 16,
     backgroundColor: "#FFFFFF",
     borderRadius: 12,
+    marginTop:25,
   },
 
   image: {
-    width: 80,
-    height: 80,
-    borderRadius: 8,
+  width: 80,
+  height: 80,
+  borderRadius: 8,
+  flexShrink: 0,
   },
 
   content: {
@@ -66,9 +69,10 @@ const styles = StyleSheet.create({
   },
 
   header: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    justifyContent: "space-between",
+  flexDirection: "row",
+  alignItems: "flex-start",
+  justifyContent: "space-between",
+  gap: 8,
   },
 
   title: {
@@ -79,9 +83,8 @@ const styles = StyleSheet.create({
   },
 
   playIcon: {
-    color: "#456800",
-    fontSize: 20,
-    marginLeft: 8,
+  flexShrink: 0,
+  marginTop: 2,
   },
 
   footer: {

@@ -1,5 +1,6 @@
 import { greetingsAudioCh } from "./ch/greetingsAudio";
 import { greetingsAudioEn } from "./en/greetingsAudio";
+import { familyAudioCh } from "./ch/familyAudio";
 
 type AudioSource = number; // o que o require devolve no React Native
 type AudioGroup = Record<number, AudioSource>;
@@ -8,8 +9,9 @@ export const audioRegistry: Record<string, Record<string, AudioGroup>> = {
   en: {
     greetings: greetingsAudioEn,
   },
-  Ch: {
+  ch: {
     greetings: greetingsAudioCh,
+    family: familyAudioCh,
   },
 };
 

@@ -1,10 +1,11 @@
+
 import { useEffect, useRef } from "react";
 import {
-    Animated,
-    Pressable,
-    StyleSheet,
-    Text,
-    View,
+  Animated,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
 } from "react-native";
 
 export type LanguageOption = {
@@ -23,11 +24,11 @@ export default function SlideButton({
   selectedId,
   onChange,
 }: Props) {
-    const selectedOptionExists = options.some(
+  const selectedOptionExists = options.some(
     (option) => option.id === selectedId
-    );
+  );
 
-    const selectedIndex = selectedOptionExists
+  const selectedIndex = selectedOptionExists
     ? options.findIndex((option) => option.id === selectedId)
     : 0;
 
@@ -35,17 +36,38 @@ export default function SlideButton({
     new Animated.Value(selectedIndex)
   ).current;
 
+  const count = Math.max(options.length, 1);
+
+  // A largura do indicador corresponde a cada segmento.
+  const segmentWidth = 142 / count;
+
+  const inputRange =
+    options.length >= 2
+      ? options.map((_, index) => index)
+      : [0, 1];
+
+  const outputRange =
+    options.length >= 2
+      ? options.map((_, index) => index * segmentWidth)
+      : [0, 0];
+
   useEffect(() => {
-    Animated.spring(slide, {
+    const animation = Animated.spring(slide, {
       toValue: selectedIndex,
-      useNativeDriver: false,
-      stiffness: 180,
-      damping: 20,
+      useNativeDriver: true,
+      stiffness: 220,
+      damping: 24,
       mass: 0.7,
-    }).start();
+    });
+
+    animation.start();
+
+    return () => {
+      animation.stop();
+    };
   }, [selectedIndex, slide]);
 
-  const width = `${100 / options.length}%` as `${number}%`;
+  if (options.length === 0) return null;
 
   return (
     <View style={styles.container}>
@@ -54,13 +76,15 @@ export default function SlideButton({
         style={[
           styles.indicator,
           {
-            width,
-            left: slide.interpolate({
-              inputRange: options.map((_, index) => index),
-              outputRange: options.map(
-                (_, index) => `${(index * 100) / options.length}%`
-              ),
-            }),
+            width: segmentWidth,
+            transform: [
+              {
+                translateX: slide.interpolate({
+                  inputRange,
+                  outputRange,
+                }),
+              },
+            ],
           },
         ]}
       />
@@ -80,7 +104,9 @@ export default function SlideButton({
             <Text
               style={[
                 styles.label,
-                active ? styles.activeLabel : styles.inactiveLabel,
+                active
+                  ? styles.activeLabel
+                  : styles.inactiveLabel,
               ]}
             >
               {option.label}
@@ -94,7 +120,8 @@ export default function SlideButton({
 
 const styles = StyleSheet.create({
   container: {
-    height: 44,
+    height: 38,
+    width: 150,
     flexDirection: "row",
     position: "relative",
     alignItems: "center",
@@ -108,6 +135,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 4,
     bottom: 4,
+    left: 4,
     borderRadius: 11,
     backgroundColor: "#6b9e05",
   },
@@ -121,8 +149,8 @@ const styles = StyleSheet.create({
   },
 
   label: {
-    fontSize: 14,
-    fontWeight: "600",
+    fontSize: 10,
+    fontWeight: "800",
   },
 
   activeLabel: {

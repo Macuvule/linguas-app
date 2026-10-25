@@ -44,6 +44,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     backgroundColor: "#f8fbea",
+    marginTop:10,
   },
 
   header: {

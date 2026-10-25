@@ -3,6 +3,8 @@ import SpeakerIcon from "@/components/ui/icons/speakerIcon";
 import { useAudioPlayer } from "expo-audio";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import SvgAvatarHero from '@/components/ui/illustrations/avatarHero';
+import { useToggleAudio } from "@/lib/hooks/use-toggle-audio";
+import { Ionicons } from "@expo/vector-icons";
 
 type Props = {
   name: string;
@@ -13,18 +15,8 @@ type Props = {
 };
 
 export default function PartnerMessage({ name, message, translation, originalAudio, userRecording }: Props) {
-  const player = useAudioPlayer(originalAudio);
-
-  function playOriginalAudio() {
-    if (!originalAudio) {
-      console.log("Áudio original não encontrado.");
-      return;
-    }
-
-    player.seekTo(0);
-    player.play();
-  }
-
+  const { toggle, isPlaying, hasAudio } = useToggleAudio(originalAudio);
+  
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -32,10 +24,17 @@ export default function PartnerMessage({ name, message, translation, originalAud
         <Text style={styles.name}>{name}</Text>
       </View>
 
-      <Pressable style={styles.bubble} onPress={playOriginalAudio}>
-        <Text style={styles.message}>{message}</Text>
-        <SpeakerIcon size={20} color="#456800" active={!!originalAudio} />
-
+      <Pressable style={styles.bubble} onPress={toggle}>
+        <View style={styles.messageRow}>
+          <Text style={styles.message}>{message}</Text>
+          <View style={styles.iconBox}>
+              {isPlaying ? (
+                <Ionicons name="pause" size={16} color="#456800" />
+              ) : (
+                <SpeakerIcon size={16} color="#456800" />
+              )}
+            </View>
+        </View>
         {translation && <Text style={styles.translation}>{translation}</Text>}
       </Pressable>
     </View>
@@ -54,12 +53,6 @@ const styles = StyleSheet.create({
     gap: 8,
   },
 
-  avatar: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-  },
-
   name: {
     fontSize: 12,
     color: "#5f5e5e",
@@ -74,8 +67,22 @@ const styles = StyleSheet.create({
   },
 
   message: {
+    flex: 1,
     fontSize: 18,
     color: "#191d13",
+  },
+
+  iconBox: {
+  width: 16,
+  height: 16,
+  alignItems: "center",
+  justifyContent: "center",
+  },
+
+  messageRow: {
+  flexDirection: "row",
+  alignItems: "flex-start",
+  gap: 8,
   },
 
   translation: {

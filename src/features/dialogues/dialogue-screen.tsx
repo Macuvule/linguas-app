@@ -14,9 +14,10 @@ import { getRecordingByDialogueLine } from "@/database/repositories/userRecordin
 
 type Props = {
   lessonId: number;
+  onExercisePress: () => void
 };
 
-export default function DialogueScreen({ lessonId }: Props) {
+export default function DialogueScreen({ lessonId, onExercisePress }: Props) {
   const [dialogue, setDialogue] = useState<Dialogue | null>(null);
   const [selectedSpeaker, setSelectedSpeaker] = useState<string | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -119,7 +120,7 @@ export default function DialogueScreen({ lessonId }: Props) {
             <>
               {selectedSpeaker && currentLine.speaker === selectedSpeaker ? (
                 <>
-                  <UserMessage text={currentLine.text} />
+                  <UserMessage text={currentLine.text} translation={currentLine.translation ?? ""} originalAudio={originalAudio} />
 
                   <RecordingButton
                     key={`${selectedSpeaker}-${currentLine.id}`}
@@ -175,6 +176,13 @@ export default function DialogueScreen({ lessonId }: Props) {
               >
                 <Text style={styles.nextButtonText}>Repetir</Text>
               </Pressable>
+
+              <Pressable
+                style={styles.exercisesButton}
+                onPress={onExercisePress}
+              >
+                <Text style={styles.exercisesButtonText}>Ir para os exercícios</Text>
+              </Pressable>
             </View>
           )}
         </View>
@@ -208,6 +216,23 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     marginTop: 8,
+  },
+  exercisesButton: {
+    alignSelf: "stretch",
+    backgroundColor: "transparent",
+    borderWidth: 2,
+    borderColor: "#456800",
+    paddingVertical: 14,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 12,
+  },
+
+  exercisesButtonText: {
+    color: "#456800",
+    fontSize: 16,
+    fontWeight: "700",
   },
 
   nextButtonText: {

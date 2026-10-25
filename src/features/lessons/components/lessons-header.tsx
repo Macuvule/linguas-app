@@ -1,20 +1,36 @@
 import React from "react";
-import { View, Text, Image, StyleSheet } from "react-native";
-import { Pressable } from "react-native";
+import { View, Text, StyleSheet, Pressable } from "react-native";
 import { router } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Back } from "@/components/ui/icons";
 
+const HEADER_HEIGHT = 64;
+
 export default function LessonHeader() {
+  const insets = useSafeAreaInsets();
+
   return (
-    <View style={styles.container}>
-        <Pressable
-          onPress={() => router.back()}
-          style={styles.backButton}
-          >
-          <Back color={styles.backIcon.color} size={styles.backIcon.fontSize} />
-        </Pressable>
+    <View
+      style={[
+        styles.container,
+        {
+          paddingTop: insets.top,
+          height: HEADER_HEIGHT + insets.top,
+        },
+      ]}
+    >
+      <Pressable
+        onPress={() => router.back()}
+        style={styles.backButton}
+        hitSlop={8}
+        accessibilityRole="button"
+        accessibilityLabel="Voltar"
+      >
+        <Back color={styles.backIcon.color} size={styles.backIcon.fontSize} />
+      </Pressable>
+
       <View style={styles.left}>
-        <Text style={styles.title}>Available Lessons</Text>
+        <Text style={styles.title}>Lições disponíveis</Text>
       </View>
     </View>
   );
@@ -27,7 +43,6 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     zIndex: 50,
-    height: 64,
     paddingHorizontal: 20,
     backgroundColor: "rgba(248, 251, 234, 0.95)",
     flexDirection: "row",
@@ -41,28 +56,10 @@ const styles = StyleSheet.create({
     gap: 8,
   },
 
-  logo: {
-    height: 32,
-    width: 32,
-  },
-
   title: {
     fontSize: 18,
     fontWeight: "bold",
     color: "#456800",
-  },
-
-  avatar: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: "#456800",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-
-  avatarText: {
-    color: "#FFFFFF",
   },
 
   backIcon: {

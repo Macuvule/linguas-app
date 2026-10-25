@@ -1,11 +1,19 @@
 import React from "react";
-import { Text, View, StyleSheet } from "react-native";
+import { Text, View, StyleSheet, Pressable } from "react-native";
+import { useAudioPlayer } from "expo-audio";
+import  SpeakerIcon  from "@/components/ui/icons/speakerIcon";
+import { useToggleAudio } from "@/lib/hooks/use-toggle-audio";  
+import { Ionicons } from "@expo/vector-icons";
 
 type Props = {
   text: string;
+  translation: string;
+  originalAudio?: number | null;
 };
 
-export default function UserMessage({ text }: Props) {
+export default function UserMessage({ text, translation, originalAudio = null }: Props) {
+  const { toggle, isPlaying, hasAudio } = useToggleAudio(originalAudio);
+
   return (
     <View style={styles.container}>
       <View style={styles.bubble}>
@@ -14,19 +22,32 @@ export default function UserMessage({ text }: Props) {
         </Text>
       </View>
 
-      <View style={styles.pronunciationBox}>
-        <Text style={styles.pronunciationLabel}>
-          ✓ PRONÚNCIA
-        </Text>
+      <Pressable style={styles.pronunciationBox} onPress={toggle}>
+        <View style={styles.pronunciationHeader}>
+          <Text style={styles.pronunciationLabel}>✓ PRONÚNCIA</Text> 
+          {hasAudio ? (
+            <View style={styles.iconBox}>
+              {isPlaying ? (
+                <Ionicons name="pause" size={16} color="#456800" />
+              ) : (
+                <SpeakerIcon size={16} color="#456800" />
+              )}
+            </View>
+          ) : (
+            <Text style={styles.pronunciationLabel}>(Áudio não disponível)</Text>
+          )}
 
-        <Text style={styles.pronunciationText}>
-          {text}
-        </Text>
+        </View>
+          <Text style={styles.pronunciationText}>
+            {text}
+          </Text>
 
-        <Text style={styles.tip}>
-          Pratique esta frase em voz alta.
-        </Text>
-      </View>
+          <Text style={styles.translation}>
+            {translation}
+          </Text>
+        
+      </Pressable>
+    
     </View>
   );
 }
@@ -49,6 +70,13 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
   },
 
+  iconBox: {
+  width: 16,
+  height: 16,
+  alignItems: "center",
+  justifyContent: "center",
+  },
+
   pronunciationBox: {
     marginTop: 12,
     backgroundColor: "#f2f5e4",
@@ -60,6 +88,12 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: "600",
     color: "#434937",
+  },
+
+  pronunciationHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
     marginBottom: 8,
   },
 
@@ -68,8 +102,8 @@ const styles = StyleSheet.create({
     color: "#456800",
   },
 
-  tip: {
-    fontSize: 12,
+  translation: {
+    fontSize: 14,
     color: "#5f5e5e",
     marginTop: 8,
   },

@@ -4,17 +4,17 @@ import {
   insertDialogue,
   insertDialogueLine,
   insertLesson,
-} from "../db";
+} from "../../db";
 
 export function seedGreetings() {
   // Idioma
   const englishLanguageId = insertLanguage(
-    "English",
+    "Inglês",
     "en"
   );
 
   if (!englishLanguageId) {
-    throw new Error("Não foi possível obter o ID do idioma English.");
+    throw new Error("Não foi possível obter o ID do idioma Inglês.");
   }
 
   // Categoria
@@ -57,7 +57,7 @@ export function seedGreetings() {
   // Linhas do diálogo
   insertDialogueLine(
     dialogueId,
-    "John",
+    "Paito",
     "Hello! How are you?",
     "Olá! Como estás?",
     1,
@@ -66,7 +66,7 @@ export function seedGreetings() {
 
   insertDialogueLine(
     dialogueId,
-    "Mary",
+    "Jessica",
     "I'm fine, thank you.",
     "Estou bem, obrigado.",
     2,
@@ -75,7 +75,7 @@ export function seedGreetings() {
 
   insertDialogueLine(
     dialogueId,
-    "John",
+    "Paito",
     "I'm doing great!",
     "Estou muito bem!",
     3,
