@@ -135,23 +135,17 @@ Os dados iniciais são carregados a partir da pasta `src/database/seed`.
 
 ## 5. Capturas de ecrã e demonstração
 
-![alt text](docs/screenshots/ch1.jpg)
+### Changana
 
-![alt text](docs/screenshots/ch2.jpg)
+| | | | | |
+|---|---|---|---|---|
+| <img src="docs/screenshots/ch1.jpg" width="150" alt="Changana 1"> | <img src="docs/screenshots/ch2.jpg" width="150" alt="Changana 2"> | <img src="docs/screenshots/ch3.jpg" width="150" alt="Changana 3"> | <img src="docs/screenshots/ch4.jpg" width="150" alt="Changana 4"> | <img src="docs/screenshots/ch5.jpg" width="150" alt="Changana 5"> |
 
-![alt text](docs/screenshots/ch3.jpg)
+### Inglês
 
-![alt text](docs/screenshots/ch4.jpg)
-
-![alt text](docs/screenshots/ch5.jpg)
-
-![alt text](docs/screenshots/eng1.jpg)
-
-![alt text](docs/screenshots/eng2.jpg)
-
-![alt text](docs/screenshots/eng3.jpg)
-
-![alt text](docs/screenshots/eng4.jpg)
+| | | | |
+|---|---|---|---|
+| <img src="docs/screenshots/eng1.jpg" width="150" alt="Inglês 1"> | <img src="docs/screenshots/eng2.jpg" width="150" alt="Inglês 2"> | <img src="docs/screenshots/eng3.jpg" width="150" alt="Inglês 3"> | <img src="docs/screenshots/eng4.jpg" width="150" alt="Inglês 4"> |
 
 ## 6. Como instalar e executar
 
